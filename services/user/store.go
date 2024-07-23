@@ -2,7 +2,6 @@ package user
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/muhammadderic/ecomrest/types"
 )
@@ -28,10 +27,6 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	if user.Id == 0 {
-		return nil, fmt.Errorf("user not found")
 	}
 
 	return user, nil
@@ -62,6 +57,9 @@ func scanRowsIntoUser(rows *sql.Rows) (*types.User, error) {
 		&user.Password,
 		&user.CreatedAt,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	return user, err
 }

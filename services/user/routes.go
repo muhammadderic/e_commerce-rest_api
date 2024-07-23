@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+
 	"github.com/muhammadderic/ecomrest/services/auth"
 	"github.com/muhammadderic/ecomrest/types"
 	"github.com/muhammadderic/ecomrest/utils"
@@ -20,8 +21,8 @@ func NewHandler(store types.UserStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/login", h.handleLogin).Methods(http.MethodPost)
-	router.HandleFunc("/register", h.handleRegister).Methods(http.MethodPost)
+	router.HandleFunc("/login", h.handleLogin).Methods("POST")
+	router.HandleFunc("/register", h.handleRegister).Methods("POST")
 }
 
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {

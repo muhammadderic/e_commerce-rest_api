@@ -28,7 +28,7 @@ func initConfig() Config {
 		DBPassword: getEnv("DB_PASSWORD", "yourdefaultpassword"),
 		DBAddress: fmt.Sprintf(
 			"%s:%s",
-			getEnv("DB_ADDRESS", "127.0.0.1"),
+			getEnv("DB_HOST", "127.0.0.1"),
 			getEnv("DB_PORT", "8080"),
 		),
 		DBName: getEnv("DB_NAME", "yourdbname"),

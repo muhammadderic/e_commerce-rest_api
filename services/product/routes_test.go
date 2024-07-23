@@ -1,6 +1,8 @@
 package product
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -26,7 +28,9 @@ func TestProductServiceHandlers(t *testing.T) {
 			}
 
 			rr := httptest.NewRecorder()
+
 			router := mux.NewRouter()
+
 			router.HandleFunc("/api/v1/products", handler.handleGetProducts).Methods(http.MethodGet)
 			router.ServeHTTP(rr, req)
 
@@ -39,10 +43,52 @@ func TestProductServiceHandlers(t *testing.T) {
 			}
 		},
 	)
+
+	t.Run(
+		"should succeed with valid product data",
+		func(t *testing.T) {
+			payload := types.CreateProductPayload{
+				Name:        "Product1",
+				Description: "A sample product",
+				Image:       "http://example.com/image.png",
+				Price:       100,
+				Quantity:    10,
+			}
+
+			marshalled, _ := json.Marshal(payload)
+
+			req, err := http.NewRequest(
+				http.MethodPost,
+				"/api/v1/products",
+				bytes.NewBuffer(marshalled),
+			)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			rr := httptest.NewRecorder()
+
+			router := mux.NewRouter()
+
+			router.HandleFunc("/api/v1/products", handler.handleCreateProduct).Methods(http.MethodPost)
+			router.ServeHTTP(rr, req)
+
+			t.Logf("Response Code: %d", rr.Code)
+			t.Logf("Response Body: %s", rr.Body.String())
+
+			if rr.Code != http.StatusCreated {
+				t.Errorf("expected status code %d, got %d", http.StatusCreated, rr.Code)
+			}
+		},
+	)
 }
 
 type mockProductStore struct{}
 
 func (m *mockProductStore) GetProducts() ([]*types.Product, error) {
 	return nil, nil
+}
+
+func (m *mockProductStore) CreateProduct(product types.CreateProductPayload) error {
+	return nil
 }

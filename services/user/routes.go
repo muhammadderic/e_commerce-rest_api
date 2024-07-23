@@ -26,7 +26,51 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
+	// Get JSON payload
+	var payload types.LoginUserPayload
+	if err := utils.ParseJSON(r, &payload); err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
 
+	// Validate the payload
+	if err := utils.Validate.Struct(payload); err != nil {
+		errors := err.(validator.ValidationErrors)
+		utils.WriteError(
+			w,
+			http.StatusBadRequest,
+			fmt.Errorf("invalid request: %s", errors),
+		)
+		return
+	}
+
+	// Check if the user exists
+	user, err := h.store.GetUserByEmail(payload.Email)
+	if err != nil {
+		utils.WriteError(
+			w,
+			http.StatusBadRequest,
+			fmt.Errorf("user %s already exists", user.Email),
+		)
+		return
+	}
+
+	// Check if the password is correct
+	if !auth.ComparePasswords(user.Password, []byte(payload.Password)) {
+		utils.WriteError(
+			w,
+			http.StatusBadRequest,
+			fmt.Errorf("invalid credentials"),
+		)
+		return
+	}
+
+	// Return a HTTP 200 status code
+	utils.WriteJSON(
+		w,
+		http.StatusOK,
+		nil,
+	)
 }
 
 func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +104,7 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Hash the user's password
-	hashedPasword, err := auth.HashPassword(user.Password)
+	hashedPasword, err := auth.GenerateHashPassword(user.Password)
 	if err != nil {
 		utils.WriteError(
 			w,

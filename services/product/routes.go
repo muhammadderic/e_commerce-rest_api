@@ -5,6 +5,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/muhammadderic/ecomrest/types"
+	"github.com/muhammadderic/ecomrest/utils"
 )
 
 type Handler struct {
@@ -21,6 +22,17 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
+	ps, err := h.store.GetProducts()
+	if err != nil {
+		utils.WriteError(
+			w,
+			http.StatusInternalServerError,
+			err,
+		)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, ps)
 }
 
 func (h *Handler) handleCreateProduct(w http.ResponseWriter, r *http.Request) {

@@ -39,4 +39,5 @@ type UserStore interface {
 }
 
 type ProductStore interface {
+	GetProducts() ([]*Product, error)
 }
